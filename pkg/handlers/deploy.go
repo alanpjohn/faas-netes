@@ -26,7 +26,7 @@ import (
 )
 
 // initialReplicasCount how many replicas to start of creating for a function
-const initialReplicasCount = 1
+const initialReplicasCount = 0
 
 // MakeDeployHandler creates a handler to create new functions in the cluster
 func MakeDeployHandler(functionNamespace string, factory k8s.FunctionFactory, functionList *k8s.FunctionList) http.HandlerFunc {
@@ -229,6 +229,10 @@ func makeDeploymentSpec(request types.FunctionDeployment, existingSecrets map[st
 		},
 	}
 
+	if runtime, err := getRuntime(request); err == nil {
+		deploymentSpec.Spec.Template.Spec.RuntimeClassName = &runtime
+	}
+
 	factory.ConfigureReadOnlyRootFilesystem(request, deploymentSpec)
 	factory.ConfigureContainerUserID(deploymentSpec)
 
@@ -237,6 +241,16 @@ func makeDeploymentSpec(request types.FunctionDeployment, existingSecrets map[st
 	}
 
 	return deploymentSpec, nil
+}
+
+func getRuntime(request types.FunctionDeployment) (string, error) {
+	if request.Annotations != nil {
+		annotations := *request.Annotations
+		if runtime, ok := annotations["org.openfaas.profile"]; ok {
+			return runtime, nil
+		}
+	}
+	return "", fmt.Errorf("no runtime configuration found")
 }
 
 func makeServiceSpec(request types.FunctionDeployment, factory k8s.FunctionFactory) (*corev1.Service, error) {

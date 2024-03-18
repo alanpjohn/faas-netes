@@ -4,9 +4,8 @@ IMG_NAME?=faas-netes
 
 VERBOSE?=false
 
-TAG?=latest
-OWNER?=openfaas
-SERVER?=ttl.sh
+TAG?=dev
+OWNER?=alanpjohn
 export DOCKER_CLI_EXPERIMENTAL=enabled
 export DOCKER_BUILDKIT=1
 
@@ -36,18 +35,18 @@ build-docker:
 	docker build \
 	--build-arg GIT_COMMIT=$(GIT_COMMIT) \
 	--build-arg VERSION=$(VERSION) \
-	-t $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) .
+	-t $(OWNER)/$(IMG_NAME):$(TAG) .
 
 .PHONY: build-buildx
 build-buildx:
-	@echo $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) && \
+	@echo $(OWNER)/$(IMG_NAME):$(TAG) && \
 	docker buildx create --use --name=multiarch --node=multiarch && \
 	docker buildx build \
 		--output "type=image,push=false" \
 		--platform linux/amd64 \
         --build-arg GIT_COMMIT=$(GIT_COMMIT) \
         --build-arg VERSION=$(VERSION) \
-		--tag $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) \
+		--tag $(OWNER)/$(IMG_NAME):$(TAG) \
 		.
 
 .PHONY: build-buildx-all
@@ -58,31 +57,31 @@ build-buildx-all:
 		--output "type=image,push=false" \
         --build-arg GIT_COMMIT=$(GIT_COMMIT) \
         --build-arg VERSION=$(VERSION) \
-		--tag $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) \
+		--tag $(OWNER)/$(IMG_NAME):$(TAG) \
 		.
 
 .PHONY: publish-buildx-all
 publish-buildx-all:
-	@echo  $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) && \
+	@echo  $(OWNER)/$(IMG_NAME):$(TAG) && \
 	docker buildx create --use --name=multiarch --node=multiarch && \
 	docker buildx build \
 		--platform linux/amd64,linux/arm/v7,linux/arm64 \
 		--push=true \
         --build-arg GIT_COMMIT=$(GIT_COMMIT) \
         --build-arg VERSION=$(VERSION) \
-		--tag $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) \
+		--tag $(OWNER)/$(IMG_NAME):$(TAG) \
 		.
 
 .PHONY: publish-buildx
 publish-buildx:
-	@echo  $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) && \
+	@echo  $(OWNER)/$(IMG_NAME):$(TAG) && \
 	docker buildx create --use --name=multiarch --node=multiarch && \
 	docker buildx build \
 		--platform linux/amd64 \
 		--push=true \
         --build-arg GIT_COMMIT=$(GIT_COMMIT) \
         --build-arg VERSION=$(VERSION) \
-		--tag $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) \
+		--tag $(OWNER)/$(IMG_NAME):$(TAG) \
 		.
 
 charts: verify-charts charts-only
