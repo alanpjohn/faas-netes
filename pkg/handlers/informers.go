@@ -62,8 +62,6 @@ func applyValidation(deployment *appsv1.Deployment, kubeClient *kubernetes.Clien
 	var target int
 	if current == 0 {
 		target = 1
-	} else if current > MaxReplicas {
-		target = MaxReplicas
 	} else {
 		return nil
 	}
